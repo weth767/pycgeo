@@ -3,7 +3,7 @@ import pygame
 from resources.canvas import Canvas
 
 
-class PygameCanvas(Canvas, pygame.display):
+class PygameCanvas(Canvas):
     screen = None
 
     def __init__(self, **kwargs):
