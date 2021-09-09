@@ -10,7 +10,6 @@ class Languages(Enum):
 class Messages:
     _locale = locale.getdefaultlocale()
     if _locale[0] != Languages.PT_BR.value:
-        print('entrou aqui')
         # segments and points errors
         SP_MS01 = "Segments and points do not can be None on same time"
         SP_MS02 = "Segments do not can be None"
