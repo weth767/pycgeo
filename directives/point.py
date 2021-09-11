@@ -1,5 +1,7 @@
 import math
 
+from resources.canvas import Canvas
+
 
 class Point:
     def __init__(self, **kwargs):
@@ -70,6 +72,3 @@ class Point:
         if self.z is None:
             return Point(x=(self.x * value), y=(self.y * value))
         return Point(x=(self.x * value), y=(self.y * value), z=(self.z * value))
-
-    def show(self):
-        raise NotImplementedError("Need to override and implement this method with your favorite graphics library")

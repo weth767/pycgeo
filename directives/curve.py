@@ -32,7 +32,6 @@ class Curve(metaclass=abc.ABCMeta):
                 self._usePoints = True
                 return
             if len(segments) == 2:
-                print(len(segments))
                 self.seg1: Segment = segments[0]
                 self.seg2: Segment = segments[1]
                 self._useSegments = True
@@ -50,12 +49,3 @@ class Curve(metaclass=abc.ABCMeta):
 
     def show(self):
         self._verifyRules()
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-            self.screen.fill((255, 255, 255))
-            pygame.draw.line(self.screen, (0, 0, 0), (self.a.x, self.a.y), (self.b.x, self.b.y))
-            pygame.draw.line(self.screen, (0, 0, 0), (self.b.x, self.b.y), (self.c.x, self.c.y))
-            pygame.display.update()
