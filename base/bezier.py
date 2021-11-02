@@ -47,3 +47,31 @@ class QuadraticBezierCurve:
     def _nextPoint(x, y, precision):
         diff = int(y - x)
         return x + (diff * precision)
+
+
+class CubicBezierCurve:
+    def __init__(self, a: Point, b: Point, c: Point, d: Point, precision=0.0001):
+        self.a = a
+        self.b = b
+        self.c = c
+        self.d = d
+        self.precision = 1 if (precision is None or precision <= 0) else precision
+
+    @staticmethod
+    def _nextPoint(x, y, precision):
+        diff = int(y - x)
+        return x + (diff * precision)
+
+    def build(self):
+        points = []
+        i = 0
+        while True:
+            x = pow(1 - i, 3) * self.a.x + 3 * i * pow(1 - i, 2) * self.b.x + 3 * i * i * (1 - i) * self.c.x + \
+                pow(i, 3) * self.d.x
+            y = pow(1 - i, 3) * self.a.y + 3 * i * pow(1 - i, 2) * self.b.y + 3 * i * i * (1 - i) * self.c.y + \
+                pow(i, 3) * self.d.y
+            points.append(Point(x=x, y=y))
+            if i >= 1:
+                break
+            i += self.precision
+        return points
