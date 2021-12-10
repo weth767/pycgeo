@@ -16,6 +16,7 @@ class Messages:
         SP_MS03 = "Points do not can be None"
         # common errors
         C_MS01 = "Invalid data type"
+        C_MS02 = "Value wasn't found between the valid values"
         # canvas errors
         CV_MS01 = "Width and Height are necessary to create a screen"
     else:
@@ -24,5 +25,5 @@ class Messages:
         SP_MS03 = "Pontos não podem ser nulos"
 
         C_MS01 = "Tipo de dado inválido"
-
+        C_MS02 = "O valor não foi encontrado entre os valores válidos"
         CV_MS01 = "O comprimento e largura são necessários para criar a tela"
