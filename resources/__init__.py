@@ -56,7 +56,7 @@ class PygameCanvas(Canvas):
                     sys.exit()
             self.screen.fill(background_color)
             for point in points:
-                pygame.draw.circle(self.screen, color, (point.x, point.y), 1, 1)
+                pygame.draw.circle(self.screen, color, (point.x, self.h - point.y), 1, 1)
             pygame.display.update()
 
 

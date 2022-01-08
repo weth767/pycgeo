@@ -73,7 +73,7 @@ class Point:
 
 
 class LinerBezierCurve:
-    def __init__(self, a: Point, b: Point, precision=0.0001):
+    def __init__(self, a: Point, b: Point, precision=0.001):
         self.a = a
         self.b = b
         self.precision = 1 if (precision is None or precision <= 0) else precision

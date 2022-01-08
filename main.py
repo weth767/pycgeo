@@ -1,25 +1,31 @@
 from core import LinerBezierCurve, QuadraticBezierCurve, CubicBezierCurve, Point
 from resources import PygameCanvas
-from shapes import Triangle
+from shapes import Triangle, Rectangle
 
 
 def main():
-    apoint = Point(x=100, y=120)
-    bpoint = Point(x=500, y=250)
-    cpoint = Point(x=50, y=400)
-    dpoint = Point(x=250, y=420)
+    apoint = Point(x=100, y=80)
+    bpoint = Point(x=160, y=140)
+    cpoint = Point(x=220, y=80)
+    # apoint = Point(x=100, y=260)
+    # bpoint = Point(x=160, y=200)
+    # cpoint = Point(x=220, y=260)
     lbc = LinerBezierCurve(a=apoint, b=bpoint)
     lbc2 = LinerBezierCurve(a=bpoint, b=cpoint)
-    lbc3 = LinerBezierCurve(a=cpoint, b=dpoint)
-    # qbc = QuadraticBezierCurve(a=apoint, b=bpoint, c=cpoint)
-    # cbc = CubicBezierCurve(a=apoint, b=bpoint, c=cpoint, d=dpoint)
-    # points = lbc.build()
-    # points1 = qbc.build()
-    # points2 = cbc.build()
-    # canvas = PygameCanvas(width=500, height=500)
-    # canvas.draw(points=points2)
+    lbc3 = LinerBezierCurve(a=cpoint, b=apoint)
     triangle = Triangle(draw_module=PygameCanvas())
     triangle.draw(linear_bezier_curves=[lbc, lbc2, lbc3])
+    ### rectangle
+    # dpoint = Point(x=100, y=40)
+    # epoint = Point(x=100, y=120)
+    # fpoint = Point(x=180, y=120)
+    # gpoint = Point(x=180, y=40)
+    # lbc = LinerBezierCurve(a=dpoint, b=epoint)
+    # lbc2 = LinerBezierCurve(a=epoint, b=fpoint)
+    # lbc3 = LinerBezierCurve(a=fpoint, b=gpoint)
+    # lbc4 = LinerBezierCurve(a=gpoint, b=dpoint)
+    # rectangle = Rectangle(draw_module=PygameCanvas())
+    # rectangle.draw(linear_bezier_curves=[lbc, lbc2, lbc3, lbc4])
 
 
 if __name__ == '__main__':
