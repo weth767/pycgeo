@@ -72,7 +72,7 @@ class Point:
         return Point(x=(self.x * value), y=(self.y * value), z=(self.z * value))
 
 
-class LinerBezierCurve:
+class LinearBezierCurve:
     def __init__(self, a: Point, b: Point, precision=0.001):
         self.a = a
         self.b = b
