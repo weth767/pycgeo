@@ -18,6 +18,10 @@ class Shape(metaclass=abc.ABCMeta):
 
 
 class Circle(Shape):
+    """
+    Circle class, that implements all methods of Shape Abstract Class and
+
+    """
     def __init__(self, draw_module: Canvas):
         super(Circle, self).__init__(draw_module)
 
@@ -50,11 +54,15 @@ class Circle(Shape):
 
 class StraightLine(Shape):
     """
-    Class constructor method, to set draw module or/and a and b points
-    :param draw_module(Canvas)
-    :return None:
+    Straight Line Class that implements all methods of Shape Abstract Class and implements build method of Linear
+    Bézier curve to represent a Straight Line geometric shape
     """
     def __init__(self, draw_module: Canvas = None, a: Point = None, b: Point = None):
+        """
+        Class constructor method, to set draw module or/and a and b points
+        :param draw_module(Canvas)
+        :return None:
+        """
         self.b = b
         self.a = a
         self.draw_module = draw_module
@@ -98,37 +106,58 @@ class StraightLine(Shape):
 
 
 class Triangle(Shape):
+    """
+    Triangle Class, that implements all methods of Shape Abstract Class to represent a triangle geometric shape
+    """
     def __init__(self, draw_module: Canvas):
+        """
+       Class constructor method, to set draw module
+       :param draw_module(Canvas)
+       :return None:
+       """
         super(Triangle, self).__init__(draw_module)
 
     def draw(self, **kwargs):
         """
         Implementation of abstract class Shape method to transcribe figure to any graphic module(draw_module)
         :param kwargs:
+        :keyword lines(list[StraightLine]) List of StraightLines, with minimum length equal three, where,
+        the lines are interconnected
         :return:
         """
-        linear_bezier_curves = kwargs.get('linear_bezier_curves')
-        if linear_bezier_curves is None or type(linear_bezier_curves) != list:
-            raise Exception(Messages.C_MS02)
-        # validar as regras do triangulo
-        if len(linear_bezier_curves) != 3:
-            raise Exception("O Triangulo precisa possuir 3 linhas de Bezier")
-        # e criar uma lista de pontos
-        points_lbc1 = linear_bezier_curves[0].build()
-        points_lbc2 = linear_bezier_curves[1].build()
-        points_lbc3 = linear_bezier_curves[2].build()
+        lines: list[StraightLine] = kwargs.get('lines')
+        if lines is None:
+            raise Exception("Field cannot be None")
+        # validar as outras regras do triangulo(conectividade dos pontos iniciais e finais de cada linha)
+        if len(lines) != 3:
+            raise Exception("A triangle need three lines(StraightLine) to be drawn")
+        points_lbc1 = lines[0].build()
+        points_lbc2 = lines[1].build()
+        points_lbc3 = lines[2].build()
         self.draw_module.draw(points=points_lbc1 + points_lbc2 + points_lbc3)
 
 
 class Rectangle(Shape):
     def __init__(self, draw_module: Canvas):
+        """
+        Class constructor method, to set draw module
+        :param draw_module(Canvas)
+        :return None:
+        """
         super(Rectangle, self).__init__(draw_module)
 
     def draw(self, **kwargs):
+        """
+            Implementation of abstract class Shape method to transcribe figure to any graphic module(draw_module)
+            :param kwargs:
+            :keyword lines(list[StraightLine]) List of StraightLines, with minimum length equal four, where,
+            the lines are interconnected
+            :return:
+        """
         linear_bezier_curves = kwargs.get('linear_bezier_curves')
         if linear_bezier_curves is None or type(linear_bezier_curves) != list:
             raise Exception(Messages.C_MS02)
-        # validar as regras do triangulo
+        # validar as regras do retangulo
         if len(linear_bezier_curves) != 4:
             raise Exception("O Quadrado precisa possuir 4 linhas de Bezier")
         # e criar uma lista de pontos
