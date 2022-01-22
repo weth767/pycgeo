@@ -121,7 +121,7 @@ class Triangle(Shape):
         """
         Implementation of abstract class Shape method to transcribe figure to any graphic module(draw_module)
         :param kwargs:
-        :keyword lines(list[StraightLine]) List of StraightLines, with minimum length equal three, where,
+        :keyword lines(list[StraightLine]) List of StraightLines, with length equal three, where,
         the lines are interconnected
         :return:
         """
@@ -150,19 +150,20 @@ class Rectangle(Shape):
         """
             Implementation of abstract class Shape method to transcribe figure to any graphic module(draw_module)
             :param kwargs:
-            :keyword lines(list[StraightLine]) List of StraightLines, with minimum length equal four, where,
+            :keyword lines(list[StraightLine]) List of StraightLines, with length equal four, where,
             the lines are interconnected
             :return:
         """
-        linear_bezier_curves = kwargs.get('linear_bezier_curves')
-        if linear_bezier_curves is None or type(linear_bezier_curves) != list:
-            raise Exception(Messages.C_MS02)
+        lines: list[StraightLine] = kwargs.get('lines')
+        if lines is None:
+            raise Exception("Field cannot be None")
         # validar as regras do retangulo
-        if len(linear_bezier_curves) != 4:
-            raise Exception("O Quadrado precisa possuir 4 linhas de Bezier")
+        if len(lines) != 4:
+            raise Exception("A triangle need three lines(StraightLine) to be drawn")
         # e criar uma lista de pontos
-        points_lbc1 = linear_bezier_curves[0].build()
-        points_lbc2 = linear_bezier_curves[1].build()
-        points_lbc3 = linear_bezier_curves[2].build()
-        points_lbc4 = linear_bezier_curves[3].build()
+        points_lbc1 = lines[0].build()
+        points_lbc2 = lines[1].build()
+        points_lbc3 = lines[2].build()
+        points_lbc4 = lines[3].build()
         self.draw_module.draw(points=points_lbc1 + points_lbc2 + points_lbc3 + points_lbc4)
+        

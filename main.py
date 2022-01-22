@@ -1,23 +1,23 @@
 from core import LinearBezierCurve, Point
-from resources import PygameCanvas
-from shapes import Triangle, Rectangle, Circle
+from resources import PygameCanvas, TkinterCanvas
+from shapes import Triangle, Rectangle, Circle, StraightLine
 
 
 def main():
     apoint = Point(x=100, y=80)
-    bpoint = Point(x=160, y=140)
+    bpoint = Point(x=160, y=200)
     cpoint = Point(x=220, y=80)
     # apoint = Point(x=100, y=260)
     # bpoint = Point(x=160, y=200)
     # cpoint = Point(x=220, y=260)
-    lbc = LinearBezierCurve(a=apoint, b=bpoint)
-    lbc2 = LinearBezierCurve(a=bpoint, b=cpoint)
-    lbc3 = LinearBezierCurve(a=cpoint, b=apoint)
-    triangle = Triangle(draw_module=PygameCanvas())
-    triangle.draw(linear_bezier_curves=[lbc, lbc2, lbc3])
+    l1 = StraightLine(a=apoint, b=bpoint)
+    l2 = StraightLine(a=bpoint, b=cpoint)
+    l3 = StraightLine(a=cpoint, b=apoint)
+    triangle = Triangle(draw_module=TkinterCanvas())
+    triangle.draw(lines=[l1, l2, l3])
     # circle = Circle(draw_module=PygameCanvas())
     # circle.draw(point=apoint, radius=50)
-    ### rectangle
+    ## rectangle
     # dpoint = Point(x=100, y=40)
     # epoint = Point(x=100, y=120)
     # fpoint = Point(x=180, y=120)
