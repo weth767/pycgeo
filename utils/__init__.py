@@ -12,3 +12,8 @@ class Utils:
     @staticmethod
     def rgb_to_hex(r: int, g: int, b: int):
         return '#{:X}{:X}{:X}'.format(r, g, b)
+
+
+class Colors:
+    black = (0, 0, 0)
+    white = (255, 255, 255)

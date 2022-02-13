@@ -5,7 +5,7 @@ import pygame
 from errors import Messages
 import tkinter as tk
 
-from utils import Utils
+from utils import Utils, Colors
 
 
 class Canvas(metaclass=abc.ABCMeta):
@@ -29,11 +29,30 @@ class PygameCanvas(Canvas):
 
     def __init__(self, **kwargs):
         pygame.init()
-        self.w = kwargs.get('width') if kwargs.get('width') is not None else 500
-        self.h = kwargs.get('height') if kwargs.get('height') is not None else 500
+        pygame.font.init()
+        self.font = pygame.font.SysFont('Arial', 10)
+        self.w = kwargs.get('width') if kwargs.get('width') is not None else 1000
+        self.h = kwargs.get('height') if kwargs.get('height') is not None else 1000
+        self.use_cartesian_plan = kwargs.get('use_cartesian_plan') \
+            if kwargs.get('use_cartesian_plan') is not None else False
         if self.w is None or self.h is None:
             print(Messages.CV_MS01)
         self.screen = pygame.display.set_mode((self.w, self.h))
+
+    def _cartesian_plan(self):
+        half_height = self.h / 2
+        half_width = self.w / 2
+        pygame.draw.line(self.screen, Colors.black, (0, half_height), (self.w, half_height))
+        pygame.draw.line(self.screen, Colors.black, (half_width, 0), (half_width, self.h))
+        # ajustar toda a organização para o ponto 0,0 ser o meio da frame desenhado
+        pygame.draw.circle(self.screen, Colors.black, (half_width, half_height), 2, 0)
+        # drawing x axis after 0 point
+        for w in range(1, int(half_width)):
+            if w % 20 == 0:
+                text = self.font.render(str(w), False, Colors.black)
+                self.screen.blit(text, (half_width + w - 5, (half_height - 20)))
+                pygame.draw.line(self.screen, Colors.black, (half_width + w, (half_height - 3)),
+                                 (half_width + w, half_height + 3))
 
     def draw(self, **kwargs) -> None:
         """
@@ -42,7 +61,7 @@ class PygameCanvas(Canvas):
           :arg points (list) List of Point that will be drawn on screen
           :arg color (tuple, optional) Tuple represent intensity of RGB color of drawn points
           :arg background_color (tuple, optional) Tuple represent intensity of RGB color of screen background
-
+          :arg
        Returns:
            None
        """
@@ -58,8 +77,15 @@ class PygameCanvas(Canvas):
                     pygame.quit()
                     sys.exit()
             self.screen.fill(background_color)
-            for point in points:
-                pygame.draw.circle(self.screen, color, (point.x, self.h - point.y), 1, 1)
+            if self.use_cartesian_plan:
+                self._cartesian_plan()
+                for point in points:
+                    x = self.w / 2 + point.x
+                    y = self.h - (self.h / 2 + point.y)
+                    pygame.draw.circle(self.screen, color, (x, y), 1, 1)
+            else:
+                for point in points:
+                    pygame.draw.circle(self.screen, color, (point.x, self.h - point.y), 1, 1)
             pygame.display.update()
 
 
