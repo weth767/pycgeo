@@ -13,7 +13,7 @@ def main():
     l1 = StraightLine(a=apoint, b=bpoint)
     l2 = StraightLine(a=bpoint, b=cpoint)
     l3 = StraightLine(a=cpoint, b=apoint)
-    triangle = Triangle(draw_module=TkinterCanvas())
+    triangle = Triangle(draw_module=PygameCanvas(use_cartesian_plan=True))
     triangle.draw(lines=[l1, l2, l3])
     # circle = Circle(draw_module=PygameCanvas())
     # circle.draw(point=apoint, radius=50)
