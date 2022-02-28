@@ -1,8 +1,11 @@
 import abc
 import sys
+import tkinter
+
 import pygame
 from errors import Messages
 import tkinter as tk
+from tkinter import font
 from utils import Utils, Colors, Consts
 
 
@@ -47,33 +50,33 @@ class PygameCanvas(Canvas):
         """
         half_height = self.h / 2
         half_width = self.w / 2
-        pygame.draw.line(self.screen, Colors.black, (0, half_height), (self.w, half_height))
-        pygame.draw.line(self.screen, Colors.black, (half_width, 0), (half_width, self.h))
-        pygame.draw.circle(self.screen, Colors.black, (half_width, half_height), 2, 0)
+        pygame.draw.line(self.screen, Colors.BLACK, (0, half_height), (self.w, half_height))
+        pygame.draw.line(self.screen, Colors.BLACK, (half_width, 0), (half_width, self.h))
+        pygame.draw.circle(self.screen, Colors.BLACK, (half_width, half_height), 2, 0)
         for w in range(1, int(half_width)):
             if w % 25 == 0:
                 # eixo x positivo
-                textxp = self.font.render(str(w), False, Colors.black)
+                textxp = self.font.render(str(w), False, Colors.BLACK)
                 self.screen.blit(textxp, (half_width + w - 5, (half_height - 20)))
-                pygame.draw.line(self.screen, Colors.black, (half_width + w, (half_height - 3)),
+                pygame.draw.line(self.screen, Colors.BLACK, (half_width + w, (half_height - 3)),
                                  (half_width + w, half_height + 3))
                 # eixo x negativo
-                textxn = self.font.render(f'-{str(w)}', False, Colors.black)
+                textxn = self.font.render(f'-{str(w)}', False, Colors.BLACK)
                 self.screen.blit(textxn, (half_width - 5 - w, (half_height - 20)))
-                pygame.draw.line(self.screen, Colors.black, (half_width - w, (half_height - 3)),
+                pygame.draw.line(self.screen, Colors.BLACK, (half_width - w, (half_height - 3)),
                                  (half_width - w, half_height + 3))
 
         for h in range(1, int(half_height)):
             if h % 25 == 0:
                 # eixo y positivo
-                textyp = self.font.render(str(h), False, Colors.black)
+                textyp = self.font.render(str(h), False, Colors.BLACK)
                 self.screen.blit(textyp, (half_width - 20, (half_height - h - 5)))
-                pygame.draw.line(self.screen, Colors.black, (half_width - 3, (half_height - h)),
+                pygame.draw.line(self.screen, Colors.BLACK, (half_width - 3, (half_height - h)),
                                  (half_width + 3, half_height - h))
                 # eixo y negativo
-                textyn = self.font.render(f'-{str(h)}', False, Colors.black)
+                textyn = self.font.render(f'-{str(h)}', False, Colors.BLACK)
                 self.screen.blit(textyn, (half_width - 20, (half_height + h - 5)))
-                pygame.draw.line(self.screen, Colors.black, (half_width - 3, (half_height + h)),
+                pygame.draw.line(self.screen, Colors.BLACK, (half_width - 3, (half_height + h)),
                                  (half_width + 3, half_height + h))
 
     def draw(self, **kwargs) -> None:
@@ -90,9 +93,9 @@ class PygameCanvas(Canvas):
        """
         self.screen = kwargs.get('screen') if kwargs.get('screen') is not None else self.screen
         points = kwargs.get('points') if kwargs.get('points') is not None else []
-        color = kwargs.get('color') if kwargs.get('color') is not None else Colors.black
+        color = kwargs.get('color') if kwargs.get('color') is not None else Colors.BLACK
         background_color = kwargs.get('background_color') if kwargs.get('background_color') is not None else \
-            Colors.white
+            Colors.WHITE
         pygame.display.set_caption('Canvas')
         while True:
             for event in pygame.event.get():
@@ -134,6 +137,44 @@ class TkinterCanvas(Canvas):
         self.screen = tk.Tk()
         self.screen.configure(width=self.w, height=self.h)
 
+    def __build_cartesian_plan__(self, canvas: tkinter.Canvas):
+        """
+        Draw a cartesian plan into screen showing 25 by 25 point to each axis by the screen size
+        :return:
+        """
+        half_height = self.h / 2
+        half_width = self.w / 2
+        canvas.create_line((0, half_height), (self.w, half_height), width=1,
+                           fill=Colors.BLACK_HEX)
+        canvas.create_line((half_width, 0), (half_width, self.h), width=1,
+                           fill=Colors.BLACK_HEX)
+        canvas.create_oval((half_width, half_height), (half_width, half_height), width=3, fill=Colors.BLACK_HEX)
+        for w in range(1, int(half_width)):
+            if w % 25 == 0:
+                # eixo x positivo
+                canvas.create_text(half_width + w, (half_height - 10), fill=Colors.BLACK_HEX,
+                                   font=font.Font(family=Consts.DEFAULT_FONT_FAMILY, size=Consts.DEFAULT_FONT_SIZE -1),
+                                   text=w)
+                canvas.create_line((half_width + w, (half_height - 3)), (half_width + w, half_height + 3))
+                # eixo x negativo
+                canvas.create_text(half_width - w, (half_height - 10), fill=Colors.BLACK_HEX,
+                                   font=font.Font(family=Consts.DEFAULT_FONT_FAMILY, size=Consts.DEFAULT_FONT_SIZE - 1),
+                                   text=w * -1)
+                canvas.create_line((half_width - w, (half_height - 3)), (half_width - w, half_height + 3))
+
+        for h in range(1, int(half_height)):
+            if h % 25 == 0:
+                # eixo y positivo
+                canvas.create_text(half_width - 13, (half_height - h), fill=Colors.BLACK_HEX,
+                                   font=font.Font(family=Consts.DEFAULT_FONT_FAMILY, size=Consts.DEFAULT_FONT_SIZE - 1),
+                                   text=h)
+                canvas.create_line(half_width - 3, (half_height - h), half_width + 3, half_height - h)
+                # eixo y negativo
+                canvas.create_text(half_width - 13, (half_height + h), fill=Colors.BLACK_HEX,
+                                   font=font.Font(family=Consts.DEFAULT_FONT_FAMILY, size=Consts.DEFAULT_FONT_SIZE - 1),
+                                   text=h * -1)
+                canvas.create_line(half_width - 3, (half_height + h), half_width + 3, half_height + h)
+
     def draw(self, **kwargs):
         """
         Draw method of Tkinter Canvas Module
@@ -148,15 +189,22 @@ class TkinterCanvas(Canvas):
         """
         self.screen = kwargs.get('screen') if kwargs.get('screen') is not None else self.screen
         points = kwargs.get('points') if kwargs.get('points') is not None else []
-        color = kwargs.get('color') if kwargs.get('color') is not None else Colors.black
+        color = kwargs.get('color') if kwargs.get('color') is not None else Colors.BLACK
         color = Utils.rgb_to_hex(color[0], color[1], color[2])
         background_color = kwargs.get('background_color') if kwargs.get('background_color') is not None else \
-            Colors.white
+            Colors.WHITE
         background_color = Utils.rgb_to_hex(background_color[0], background_color[1], background_color[2])
         self.screen.title('Canvas')
         self.screen.configure(background=background_color)
         canvas = tk.Canvas(self.screen, width=self.w, height=self.h)
-        for point in points:
-            canvas.create_oval(point.x, self.h - point.y, point.x, self.h - point.y, width=0, fill=color)
+        if self.use_cartesian_plan:
+            self.__build_cartesian_plan__(canvas)
+            for point in points:
+                x = self.w / 2 + point.x
+                y = self.h - (self.h / 2 + point.y)
+                canvas.create_oval(x, y, x, y, width=0, fill=color)
+        else:
+            for point in points:
+                canvas.create_oval(point.x, self.h - point.y, point.x, self.h - point.y, width=0, fill=color)
         canvas.pack(expand=tk.YES, fill=tk.BOTH)
         self.screen.mainloop()

@@ -15,12 +15,14 @@ class Utils:
 
 
 class Consts:
-    DEFAULT_SCREEN_WIDTH = 1000
-    DEFAULT_SCREEN_HEIGHT = 1000
+    DEFAULT_SCREEN_WIDTH = 800
+    DEFAULT_SCREEN_HEIGHT = 800
     DEFAULT_FONT_SIZE = 9
     DEFAULT_FONT_FAMILY = 'Arial'
 
 
 class Colors:
-    black = (0, 0, 0)
-    white = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    BLACK_HEX = Utils.rgb_to_hex(0, 0, 0)
+    WHITE = (255, 255, 255)
+    WHITE_HEX = Utils.rgb_to_hex(255, 255, 255)
