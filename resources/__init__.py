@@ -1,11 +1,9 @@
 import abc
 import sys
 import tkinter
-from typing import Optional, Union
 import pygame
 import tkinter as tk
 from tkinter import font
-from pygame.surface import SurfaceType
 from shapes import Shape
 from utils import Utils, Colors, Consts
 

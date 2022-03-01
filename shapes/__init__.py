@@ -1,16 +1,22 @@
 import abc
-
 from core import Point, LinearBezierCurve
 from errors import Messages
 
 
 class Shape(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def __init__(self):
+    def __init__(self, **kwargs) -> None:
+        """
+        :param kwargs:
+        """
         self.canvas = None
 
     @property
     def points(self) -> list[Point]:
+        """
+        Return a list of points that defines a shape
+        :return list[Point]:
+        """
         return []
 
 
@@ -51,97 +57,58 @@ class Circle(Shape):
 
 
 class StraightLine(Shape):
-    """
-    Straight Line Class that implements all methods of Shape Abstract Class and implements build method of Linear
-    Bézier curve to represent a Straight Line geometric shape
-    """
-    def __init__(self):
-        """
-        Class constructor method
-        :return None:
-        """
-        super(StraightLine, self)
+    __points__ = []
 
-    def build(self, **kwargs):
-        """
-        Implementation of abstract class Shape method to transcribe figure to any graphic module(draw_module).
-        This method draw a straight line on screen using draw module informed on class init
-        :param kwargs:
-        :keyword a(Point)
-        :keyword b(Point)
-        :keyword linear_bezier_curve(LinearBezierCurve)
-        :return None:
-        """
-        x = kwargs.get('a'),
-        y = kwargs.get('b'),
-        linear_bezier_curve = kwargs.get('linear_bezier_curve')
-        if x is not None and isinstance(x, Point) and y is not None and isinstance(y, Point):
-            lbc = LinearBezierCurve(a=x, b=y)
-            points = lbc.build()
-            return points
-        if linear_bezier_curve is not None and isinstance(linear_bezier_curve, LinearBezierCurve):
-            points = linear_bezier_curve.build()
-            return points
+    def __init__(self, linear_bezier_curve=None, a=None, b=None):
+        super(StraightLine, self)
+        self.a = a
+        self.b = b
+        self.lbc = linear_bezier_curve
+
+        if self.a is not None and isinstance(self.a, Point) and self.b is not None and isinstance(self.b, Point):
+            self.lbc = LinearBezierCurve(a=self.a, b=self.b)
+            self.__points__ = self.lbc.build()
+        if self.lbc is not None and isinstance(self.lbc, LinearBezierCurve):
+            self.__points__ = self.lbc.build()
         raise Exception("To draw is necessary to inform x and y or linear bezier curve params!")
+
+    @property
+    def points(self) -> list[Point]:
+        return self.__points__
 
 
 class Triangle(Shape):
-    """
-    Triangle Class, that implements all methods of Shape Abstract Class to represent a triangle geometric shape
-    """
-    def __init__(self):
-        """
-       Class constructor method, to set draw module
-       :return None:
-       """
-        super(Triangle, self)
+    __points__ = []
 
-    def build(self, **kwargs) -> list[Point]:
-        """
-        Implementation of abstract class Shape method to transcribe figure to any graphic module(draw_module)
-        :param kwargs:
-        :keyword lines(list[StraightLine]) List of StraightLines, with length equal three, where,
-        the lines are interconnected
-        :return:
-        """
-        lines: list[StraightLine] = kwargs.get('lines')
+    def __init__(self, lines=None):
+        super(Triangle, self)
+        lines: list[StraightLine] = lines
         if lines is None:
             raise Exception("Field cannot be None")
         # validar as outras regras do triangulo(conectividade dos pontos iniciais e finais de cada linha)
         if len(lines) != 3:
             raise Exception("A triangle need three lines(StraightLine) to be drawn")
-        points_lbc1 = lines[0].build()
-        points_lbc2 = lines[1].build()
-        points_lbc3 = lines[2].build()
-        return points_lbc1 + points_lbc2 + points_lbc3
+        self.__points__ = lines[0].points + lines[1].points + lines[2].points
+
+    @property
+    def points(self) -> list[Point]:
+        return self.__points__
 
 
 class Rectangle(Shape):
-    def __init__(self):
-        """
-        Class constructor method, to set draw module
-        :return None:
-        """
-        super(Rectangle, self)
+    __points__ = []
 
-    def build(self, **kwargs) -> list[Point]:
-        """
-            Implementation of abstract class Shape method to transcribe figure to any graphic module(draw_module)
-            :param kwargs:
-            :keyword lines(list[StraightLine]) List of StraightLines, with length equal four, where,
-            the lines are interconnected
-            :return:
-        """
-        lines: list[StraightLine] = kwargs.get('lines')
+    def __init__(self, lines=None):
+        super(Rectangle, self)
+        lines: list[StraightLine] = lines
         if lines is None:
             raise Exception("Field cannot be None")
         # validar as regras do retangulo
         if len(lines) != 4:
             raise Exception("A triangle need three lines(StraightLine) to be drawn")
-        # e criar uma lista de pontos
-        points_lbc1 = lines[0].build()
-        points_lbc2 = lines[1].build()
-        points_lbc3 = lines[2].build()
-        points_lbc4 = lines[3].build()
-        return points_lbc1 + points_lbc2 + points_lbc3 + points_lbc4
-        
+        self.__points__ = lines[0].points + lines[1].points + lines[2].points + lines[3].points
+
+    @property
+    def points(self) -> list[Point]:
+        return self.__points__
+
