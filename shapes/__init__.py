@@ -68,8 +68,10 @@ class StraightLine(Shape):
         if self.a is not None and isinstance(self.a, Point) and self.b is not None and isinstance(self.b, Point):
             self.lbc = LinearBezierCurve(a=self.a, b=self.b)
             self.__points__ = self.lbc.build()
+            return
         if self.lbc is not None and isinstance(self.lbc, LinearBezierCurve):
             self.__points__ = self.lbc.build()
+            return
         raise Exception("To draw is necessary to inform x and y or linear bezier curve params!")
 
     @property
@@ -80,15 +82,15 @@ class StraightLine(Shape):
 class Triangle(Shape):
     __points__ = []
 
-    def __init__(self, lines=None):
+    def __init__(self, lines: list[StraightLine]):
         super(Triangle, self)
-        lines: list[StraightLine] = lines
-        if lines is None:
+        self.lines = lines
+        if self.lines is None:
             raise Exception("Field cannot be None")
         # validar as outras regras do triangulo(conectividade dos pontos iniciais e finais de cada linha)
-        if len(lines) != 3:
+        if len(self.lines) != 3:
             raise Exception("A triangle need three lines(StraightLine) to be drawn")
-        self.__points__ = lines[0].points + lines[1].points + lines[2].points
+        self.__points__ = self.lines[0].points + self.lines[1].points + self.lines[2].points
 
     @property
     def points(self) -> list[Point]:
@@ -98,15 +100,15 @@ class Triangle(Shape):
 class Rectangle(Shape):
     __points__ = []
 
-    def __init__(self, lines=None):
+    def __init__(self, lines: list[StraightLine]):
         super(Rectangle, self)
-        lines: list[StraightLine] = lines
-        if lines is None:
+        self.lines = lines
+        if self.lines is None:
             raise Exception("Field cannot be None")
         # validar as regras do retangulo
-        if len(lines) != 4:
+        if len(self.lines) != 4:
             raise Exception("A triangle need three lines(StraightLine) to be drawn")
-        self.__points__ = lines[0].points + lines[1].points + lines[2].points + lines[3].points
+        self.__points__ = self.lines[0].points + self.lines[1].points + self.lines[2].points + self.lines[3].points
 
     @property
     def points(self) -> list[Point]:
