@@ -5,6 +5,7 @@ from enum import Enum
 
 class Languages(Enum):
     PT_BR = 'pt_BR'
+    EN_US = 'en_US'
 
 
 class Messages:
