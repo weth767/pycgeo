@@ -1,77 +1,113 @@
 import abc
 import sys
-import tkinter
+from tkinter import font
 import pygame
 import tkinter as tk
-from tkinter import font
+from core import Point
 from shapes import Shape
-from utils import Utils, Colors, Consts
+from utils import Consts, Colors
 
 
-class Canvas(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    def __init__(self, width=None, height=None, show_cartesian_plan=False,
-                 show_cartesian_plan_numbers=True, show_cartesian_plan_lines=True):
-        """
-        Canvas Module
-        :param width: Optional(float) Width of screen
-        :param height: Optional(float) Height of screen
-        :param show_cartesian_plan: bool If cartesian plan mode will be used or not. Default is False
-        :param show_cartesian_plan_numbers If cartesian plan number will be showed. Default is True
-        :param show_cartesian_plan_lines If cartesian plan lines will be showed. Default is True
-        :return None
-        """
-        pass
+class Canvas:
+    def __init__(self, width: int, height: int, start: Point, tag: str, shapes: list[Shape], show_cp=False,
+                 show_cpn=True, show_cpl=True, show_border=True):
+        self.width = width
+        self.height = height
+        self.start = start
+        self.shapes = shapes
+        self.tag = tag
+        self.show_cp = show_cp
+        self.show_cpn = show_cpn
+        self.show_cpl = show_cpl
+        self.show_border = show_border
 
-    @abc.abstractmethod
-    def __build_cartesian_plan__(self, **kwargs) -> None:
-        """
-        Method to build cartesian plan mode in Canvas Module, set lines and numbers to each axis,
-        showing 25 by 25 point to each axis by the screen size by default
-        :param kwargs: Case is necessary to use any parameter
-        :return None:
-        """
-        pass
+
+class Screen(metaclass=abc.ABCMeta):
+    surfaces: {}
 
     @abc.abstractmethod
-    def draw(self, shapes: list[Shape], screen=None, color=None,
-             background_color=None, title="Canvas") -> None:
-        """
-        Method to draw shapes on screen
-        :param screen: Optional[any] Instance of screen. It's changes as module implementation
-        :param shapes: list[Shape]
-        :param color: Optional[tuple]
-        :param background_color: Optional[tuple]
-        :param title: str. Default is 'Canvas'
-        :return None
-        """
+    def __init__(self):
+        pass
+
+    """
+    Method to configure screen
+    """
+
+    @abc.abstractmethod
+    def configure(self, canvas_list: list[Canvas]) -> None:
+        pass
+
+    """
+    Method to reset configs of screen
+    """
+
+    @abc.abstractmethod
+    def reset(self) -> None:
+        pass
+
+    """
+    Method to build cartesian plan inside a surface
+    """
+
+    @abc.abstractmethod
+    def _build_cp(self, canvas: Canvas):
+        pass
+
+    """
+    Method to draw at each canvas instance of screen
+    """
+
+    @abc.abstractmethod
+    def _draw_at_canvas(self, canvas: Canvas):
+        pass
+
+    """
+    Method to draw objects listed on list of canvas by tags received
+        :param canvas
+    """
+
+    @abc.abstractmethod
+    def draw(self) -> None:
         pass
 
 
-class PygameCanvas(Canvas):
-    def __init__(self, width=None, height=None, show_cartesian_plan=False,
-                 show_cartesian_plan_numbers=True, show_cartesian_plan_lines=True):
+class PygameScreen(Screen):
+    surfaces = {}
 
+    def __init__(self):
         pygame.init()
         pygame.font.init()
         self.font = pygame.font.SysFont(Consts.DEFAULT_FONT_FAMILY, Consts.DEFAULT_FONT_SIZE)
-        self.width = width if width is not None else Consts.DEFAULT_SCREEN_WIDTH
-        self.height = height if height is not None else Consts.DEFAULT_SCREEN_HEIGHT
-        self.show_cartesian_plan = show_cartesian_plan
-        self.show_cartesian_plan_numbers = show_cartesian_plan_numbers
-        self.show_cartesian_plan_lines = show_cartesian_plan_lines
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        info = pygame.display.Info()
+        width = info.current_w
+        height = info.current_h
+        self.screen = pygame.display.set_mode((width, height * 0.95))
+        self.screen.fill(Colors.WHITE)
+        self.canvas_list: list[Canvas] = []
 
-    def __build_cartesian_plan__(self):
-        half_height = self.height / 2
-        half_width = self.width / 2
+    def configure(self, canvas_list: list[Canvas]):
+        self.canvas_list = canvas_list
+        for canvas in canvas_list:
+            surface: pygame.Surface = pygame.Surface([canvas.width, canvas.height])
+            surface.fill(Colors.WHITE)
+            self.surfaces[canvas.tag] = surface
+
+    def reset(self):
+        pass
+
+    def _build_cp(self, canvas: Canvas):
+        surface: pygame.surface = self.surfaces[canvas.tag]
+        if surface is None:
+            return
+        half_height = canvas.height / 2
+        half_width = canvas.width / 2
         # draw axis lines and circle of center
-        if self.show_cartesian_plan_lines:
-            pygame.draw.line(self.screen, Colors.BLACK, (0, half_height), (self.width, half_height))
-            pygame.draw.line(self.screen, Colors.BLACK, (half_width, 0), (half_width, self.height))
-            pygame.draw.circle(self.screen, Colors.BLACK, (half_width, half_height), 2, 0)
+        if canvas.show_cp:
+            pygame.draw.line(surface, Colors.BLACK, (0, half_height), (canvas.width, half_height))
+            pygame.draw.line(surface, Colors.BLACK, (half_width, 0), (half_width, canvas.height))
+            pygame.draw.circle(surface, Colors.BLACK, (half_width, half_height), 2, 0)
 
-        if self.show_cartesian_plan_numbers:
+        if canvas.show_cpn:
             # draw x-axis positive and negative marks and numbers
             # -5 value was used into both numbers render, to fix number position
             # -20 have same purpose
@@ -79,14 +115,14 @@ class PygameCanvas(Canvas):
                 if w % 25 == 0:
                     # positive x-axis
                     text_x_axis_positive = self.font.render(str(w), False, Colors.BLACK)
-                    self.screen.blit(text_x_axis_positive, (half_width + w - 5, (half_height - 20)))
-                    pygame.draw.line(self.screen, Colors.BLACK, (half_width + w, (half_height - 3)),
+                    surface.blit(text_x_axis_positive, (half_width + w - 5, (half_height - 20)))
+                    pygame.draw.line(surface, Colors.BLACK, (half_width + w, (half_height - 3)),
                                      (half_width + w, half_height + 3))
                     # negative x-axis
                     text_x_axis_negative = self.font.render(f'-{str(w)}', False, Colors.BLACK)
 
-                    self.screen.blit(text_x_axis_negative, (half_width - 5 - w, (half_height - 20)))
-                    pygame.draw.line(self.screen, Colors.BLACK, (half_width - w, (half_height - 3)),
+                    surface.blit(text_x_axis_negative, (half_width - 5 - w, (half_height - 20)))
+                    pygame.draw.line(surface, Colors.BLACK, (half_width - w, (half_height - 3)),
                                      (half_width - w, half_height + 3))
 
             # draw y-axis positive and negative marks and numbers
@@ -94,122 +130,165 @@ class PygameCanvas(Canvas):
                 if h % 25 == 0:
                     # positive y-axis
                     text_y_axis_positive = self.font.render(str(h), False, Colors.BLACK)
-                    self.screen.blit(text_y_axis_positive, (half_width - 20, (half_height - h - 5)))
-                    pygame.draw.line(self.screen, Colors.BLACK, (half_width - 3, (half_height - h)),
+                    surface.blit(text_y_axis_positive, (half_width - 20, (half_height - h - 5)))
+                    pygame.draw.line(surface, Colors.BLACK, (half_width - 3, (half_height - h)),
                                      (half_width + 3, half_height - h))
                     # negative y-axis
                     text_y_axis_negative = self.font.render(f'-{str(h)}', False, Colors.BLACK)
-                    self.screen.blit(text_y_axis_negative, (half_width - 20, (half_height + h - 5)))
-                    pygame.draw.line(self.screen, Colors.BLACK, (half_width - 3, (half_height + h)),
+                    surface.blit(text_y_axis_negative, (half_width - 20, (half_height + h - 5)))
+                    pygame.draw.line(surface, Colors.BLACK, (half_width - 3, (half_height + h)),
                                      (half_width + 3, half_height + h))
 
-    def draw(self, shapes: list[Shape], screen=None, color=None,
-             background_color=None, title="Canvas") -> None:
+    def _draw_at_canvas(self, canvas: Canvas):
+        surface = self.surfaces[canvas.tag]
+        if surface is None:
+            return
+        color = Colors.BLACK
+        background_color = Colors.WHITE
+        self.screen.fill(background_color)
+        if canvas.show_cp:
+            self._build_cp(canvas)
+            for shape in canvas.shapes:
+                for point in shape.points:
+                    x = canvas.width / 2 + point.x
+                    y = canvas.height - (canvas.height / 2 + point.y)
+                    pygame.draw.circle(surface, color, (x, y), 1, 1)
+        else:
+            for shape in canvas.shapes:
+                for point in shape.points:
+                    pygame.draw.circle(surface, color, (abs(point.x), abs(canvas.height - point.y)), 1, 1)
+        self.screen.blit(surface, (canvas.start.x, canvas.start.y))
 
-        self.screen = screen if screen is not None else self.screen
-        shapes = shapes if shapes is not None else []
-        color = color if color is not None and len(color) >= 3 else Colors.BLACK
-        background_color = background_color if background_color is not None and len(background_color) >= 3 else \
-            Colors.WHITE
-        pygame.display.set_caption(title)
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-            self.screen.fill(background_color)
-            if self.show_cartesian_plan:
-                self.__build_cartesian_plan__()
-                for shape in shapes:
-                    for point in shape.points:
-                        x = self.width / 2 + point.x
-                        y = self.height - (self.height / 2 + point.y)
-                        pygame.draw.circle(self.screen, color, (x, y), 1, 1)
-            else:
-                for shape in shapes:
-                    for point in shape.points:
-                        pygame.draw.circle(self.screen, color, (abs(point.x), abs(self.height - point.y)), 1, 1)
-            pygame.display.update()
+    def draw(self):
+        running = True
+        while running:
+            try:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        pygame.quit()
+                        sys.exit()
+                for canvas in self.canvas_list:
+                    self._draw_at_canvas(canvas)
+                pygame.display.flip()
+
+            except KeyboardInterrupt:
+                pass
 
 
-class TkinterCanvas(Canvas):
-    def __init__(self, width=None, height=None, show_cartesian_plan=False,
-                 show_cartesian_plan_numbers=True, show_cartesian_plan_lines=True):
+class TkinterScreen(Screen):
+    surfaces = {}
 
-        self.width = width if width is not None else Consts.DEFAULT_SCREEN_WIDTH
-        self.height = height if height is not None else Consts.DEFAULT_SCREEN_HEIGHT
-        self.show_cartesian_plan = show_cartesian_plan
-        self.show_cartesian_plan_numbers = show_cartesian_plan_numbers
-        self.show_cartesian_plan_lines = show_cartesian_plan_lines
+    def __init__(self):
         self.screen = tk.Tk()
-        self.screen.configure(width=self.width, height=self.height)
+        width = self.screen.winfo_screenwidth()
+        height = self.screen.winfo_screenheight()
+        self.screen.configure(width=width, height=height)
+        self.screen.configure(background=Colors.WHITE_HEX)
+        self.canvas_list: list[Canvas] = []
 
-    def __build_cartesian_plan__(self, canvas: tkinter.Canvas) -> None:
-        half_height = self.height / 2
-        half_width = self.width / 2
+    def configure(self, canvas_list: list[Canvas]):
+        self.canvas_list = canvas_list
+        for canvas in canvas_list:
+            surface = tk.Canvas(self.screen, width=canvas.width, height=canvas.height)
+            surface.place(relx=canvas.start.x, rely=canvas.start.y)
+            self.surfaces[canvas.tag] = surface
 
-        if self.show_cartesian_plan_lines:
+    def reset(self):
+        pass
+
+    def _build_cp(self, canvas: Canvas):
+        surface: tk.Canvas = self.surfaces[canvas.tag]
+        if surface is None:
+            return
+        half_height = canvas.height / 2
+        half_width = canvas.width / 2
+        if canvas.show_cpl:
             # draw axis lines and circle of center
-            canvas.create_line((0, half_height), (self.width, half_height), width=1,
-                               fill=Colors.BLACK_HEX)
-            canvas.create_line((half_width, 0), (half_width, self.height), width=1,
-                               fill=Colors.BLACK_HEX)
-            canvas.create_oval((half_width, half_height), (half_width, half_height), width=3, fill=Colors.BLACK_HEX)
-
-        if self.show_cartesian_plan_numbers:
+            surface.create_line((0, half_height), (canvas.width, half_height), width=1,
+                                fill=Colors.BLACK_HEX)
+            surface.create_line((half_width, 0), (half_width, canvas.height), width=1,
+                                fill=Colors.BLACK_HEX)
+            surface.create_oval((half_width, half_height), (half_width, half_height), width=3, fill=Colors.BLACK_HEX)
+        if canvas.show_cpn:
             # draw x-axis positive and negative marks and numbers
             # -10 value was used into both numbers render, to fix number position
             for w in range(1, int(half_width)):
                 if w % 25 == 0:
                     # positive x-axis
-                    canvas.create_text(half_width + w, (half_height - 10), fill=Colors.BLACK_HEX,
-                                       font=font.Font(family=Consts.DEFAULT_FONT_FAMILY,
-                                                      size=Consts.DEFAULT_FONT_SIZE - 1), text=w)
-                    canvas.create_line((half_width + w, (half_height - 3)), (half_width + w, half_height + 3))
+                    surface.create_text(half_width + w, (half_height - 10), fill=Colors.BLACK_HEX,
+                                        font=font.Font(family=Consts.DEFAULT_FONT_FAMILY,
+                                                       size=Consts.DEFAULT_FONT_SIZE - 1), text=w)
+                    surface.create_line((half_width + w, (half_height - 3)), (half_width + w, half_height + 3))
                     # negative x-axis
-                    canvas.create_text(half_width - w, (half_height - 10), fill=Colors.BLACK_HEX,
-                                       font=font.Font(family=Consts.DEFAULT_FONT_FAMILY,
-                                                      size=Consts.DEFAULT_FONT_SIZE - 1), text=w * -1)
-                    canvas.create_line((half_width - w, (half_height - 3)), (half_width - w, half_height + 3))
+                    surface.create_text(half_width - w, (half_height - 10), fill=Colors.BLACK_HEX,
+                                        font=font.Font(family=Consts.DEFAULT_FONT_FAMILY,
+                                                       size=Consts.DEFAULT_FONT_SIZE - 1), text=w * -1)
+                    surface.create_line((half_width - w, (half_height - 3)), (half_width - w, half_height + 3))
             # draw y-axis positive and negative marks and numbers
             for h in range(1, int(half_height)):
                 if h % 25 == 0:
                     # positive y-axis
-                    canvas.create_text(half_width - 13, (half_height - h), fill=Colors.BLACK_HEX,
-                                       font=font.Font(family=Consts.DEFAULT_FONT_FAMILY,
-                                                      size=Consts.DEFAULT_FONT_SIZE - 1), text=h)
-                    canvas.create_line(half_width - 3, (half_height - h), half_width + 3, half_height - h)
+                    surface.create_text(half_width - 13, (half_height - h), fill=Colors.BLACK_HEX,
+                                        font=font.Font(family=Consts.DEFAULT_FONT_FAMILY,
+                                                       size=Consts.DEFAULT_FONT_SIZE - 1), text=h)
+                    surface.create_line(half_width - 3, (half_height - h), half_width + 3, half_height - h)
                     # negative y-axis
-                    canvas.create_text(half_width - 13, (half_height + h), fill=Colors.BLACK_HEX,
-                                       font=font.Font(family=Consts.DEFAULT_FONT_FAMILY,
-                                                      size=Consts.DEFAULT_FONT_SIZE - 1), text=h * -1)
-                    canvas.create_line(half_width - 3, (half_height + h), half_width + 3, half_height + h)
+                    surface.create_text(half_width - 13, (half_height + h), fill=Colors.BLACK_HEX,
+                                        font=font.Font(family=Consts.DEFAULT_FONT_FAMILY,
+                                                       size=Consts.DEFAULT_FONT_SIZE - 1), text=h * -1)
+                    surface.create_line(half_width - 3, (half_height + h), half_width + 3, half_height + h)
 
-    def draw(self, shapes: list[Shape], screen=None, color=None,
-             background_color=None, title="Canvas") -> None:
-
-        self.screen = screen if screen is not None else self.screen
-        _shapes = shapes if shapes is not None else []
-        _color = Utils.rgb_to_hex(color[0], color[1], color[2]) if color is not None and len(color) >= 3 \
-            else Colors.BLACK_HEX
-        _background_color = Utils.rgb_to_hex(background_color[0], background_color[1], background_color[2]) \
-            if background_color is not None and len(background_color) >= 3 else Colors.WHITE_HEX
-
-        self.screen.title(title)
-        self.screen.configure(background=_background_color)
-        canvas = tk.Canvas(self.screen, width=self.width, height=self.height)
-
-        if self.show_cartesian_plan:
-            self.__build_cartesian_plan__(canvas)
-            for shape in _shapes:
+    def _draw_at_canvas(self, canvas: Canvas):
+        surface: tk.Canvas = self.surfaces[canvas.tag]
+        if surface is None:
+            return
+        color = Colors.BLACK_HEX
+        # draw borders
+        if canvas.show_border:
+            # bottom
+            surface.create_line(0, canvas.height, canvas.width, canvas.height)
+            # top
+            surface.create_line(0, 2, canvas.width, 2)
+            # right
+            surface.create_line(canvas.width, 0, canvas.width, canvas.height)
+            # left
+            surface.create_line(2, canvas.height, 2, 0)
+        if canvas.show_cp:
+            self._build_cp(canvas)
+            for shape in canvas.shapes:
                 for point in shape.points:
-                    x = self.width / 2 + point.x
-                    y = self.height - (self.height / 2 + point.y)
-                    canvas.create_oval(x, y, x, y, width=0, fill=_color)
+                    x = canvas.width / 2 + point.x
+                    y = canvas.height - (canvas.height / 2 + point.y)
+                    surface.create_oval(x, y, x, y, width=0, fill=color)
         else:
-            for shape in shapes:
+            for shape in canvas.shapes:
                 for point in shape.points:
-                    canvas.create_oval(point.x, self.height - point.y, point.x, self.height - point.y,
-                                       width=0, fill=_color)
-        canvas.pack(expand=tk.YES, fill=tk.BOTH)
-        self.screen.mainloop()
+                    surface.create_oval(point.x, canvas.height - point.y, point.x, canvas.height - point.y,
+                                        width=0, fill=color)
+        # surface.pack(expand=tk.YES, fill=tk.BOTH)
+        surface.pack(fill=tk.BOTH)
+
+    def draw(self):
+        for canvas in self.canvas_list:
+            self._draw_at_canvas(canvas)
+        try:
+            self.screen.mainloop()
+        except KeyboardInterrupt:
+            pass
+
+
+class Board:
+    def __init__(self, screen: Screen):
+        self._screen = screen
+
+    @property
+    def screen(self):
+        return self._screen
+
+    @screen.setter
+    def screen(self, screen: Screen):
+        self._screen = screen
+
+    def draw_at(self):
+        self.screen.draw()
