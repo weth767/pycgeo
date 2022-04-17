@@ -72,7 +72,7 @@ class Screen(metaclass=abc.ABCMeta):
 
 
 class PygameScreen(Screen):
-    surfaces = {}
+    surfaces: dict[str, pygame.Rect] = {}
 
     def __init__(self):
         pygame.init()
@@ -88,76 +88,106 @@ class PygameScreen(Screen):
     def configure(self, canvas_list: list[Canvas]):
         self.canvas_list = canvas_list
         for canvas in canvas_list:
-            surface: pygame.Surface = pygame.Surface([canvas.width, canvas.height])
-            surface.fill(Colors.WHITE)
+            # surface: pygame.Surface = self.screen.subsurface(pygame.Rect(canvas.start.x, canvas.start.y,
+            #                                                              canvas.width, canvas.height))
+            # surface.fill(Colors.WHITE)
+            surface = pygame.Rect((canvas.start.x, canvas.start.y, canvas.width, canvas.height))
             self.surfaces[canvas.tag] = surface
+            #self.screen.set_clip(surface)
 
     def reset(self):
         pass
 
     def _build_cp(self, canvas: Canvas):
-        surface: pygame.surface = self.surfaces[canvas.tag]
+        surface: pygame.Rect = self.surfaces[canvas.tag]
         if surface is None:
             return
-        half_height = canvas.height / 2
-        half_width = canvas.width / 2
+        half_height = canvas.start.y + (canvas.height / 2)
+        half_width = canvas.start.x + (canvas.width / 2)
         # draw axis lines and circle of center
         if canvas.show_cp:
-            pygame.draw.line(surface, Colors.BLACK, (0, half_height), (canvas.width, half_height))
-            pygame.draw.line(surface, Colors.BLACK, (half_width, 0), (half_width, canvas.height))
-            pygame.draw.circle(surface, Colors.BLACK, (half_width, half_height), 2, 0)
+            pygame.draw.line(self.screen, Colors.BLACK, (canvas.start.x, half_height),
+                             (canvas.start.x + canvas.width, half_height))
+            pygame.draw.line(self.screen, Colors.BLACK, (half_width, canvas.start.y),
+                             (half_width, canvas.start.y + canvas.height))
+            pygame.draw.circle(self.screen, Colors.BLACK, (half_width, half_height), 2, 0)
 
         if canvas.show_cpn:
             # draw x-axis positive and negative marks and numbers
             # -5 value was used into both numbers render, to fix number position
             # -20 have same purpose
-            for w in range(1, int(half_width)):
+            width_range = int(canvas.width / 2)
+            height_range = int(canvas.height / 2)
+            for w in range(1, width_range):
                 if w % 25 == 0:
                     # positive x-axis
                     text_x_axis_positive = self.font.render(str(w), False, Colors.BLACK)
-                    surface.blit(text_x_axis_positive, (half_width + w - 5, (half_height - 20)))
-                    pygame.draw.line(surface, Colors.BLACK, (half_width + w, (half_height - 3)),
+                    self.screen.blit(text_x_axis_positive, (half_width + w - 5, (half_height - 20)))
+                    pygame.draw.line(self.screen, Colors.BLACK, (half_width + w, (half_height - 3)),
                                      (half_width + w, half_height + 3))
                     # negative x-axis
                     text_x_axis_negative = self.font.render(f'-{str(w)}', False, Colors.BLACK)
 
-                    surface.blit(text_x_axis_negative, (half_width - 5 - w, (half_height - 20)))
-                    pygame.draw.line(surface, Colors.BLACK, (half_width - w, (half_height - 3)),
+                    self.screen.blit(text_x_axis_negative, (half_width - 5 - w, (half_height - 20)))
+                    pygame.draw.line(self.screen, Colors.BLACK, (half_width - w, (half_height - 3)),
                                      (half_width - w, half_height + 3))
 
             # draw y-axis positive and negative marks and numbers
-            for h in range(1, int(half_height)):
+            for h in range(1, height_range):
                 if h % 25 == 0:
                     # positive y-axis
                     text_y_axis_positive = self.font.render(str(h), False, Colors.BLACK)
-                    surface.blit(text_y_axis_positive, (half_width - 20, (half_height - h - 5)))
-                    pygame.draw.line(surface, Colors.BLACK, (half_width - 3, (half_height - h)),
+                    self.screen.blit(text_y_axis_positive, (half_width - 20, (half_height - h - 5)))
+                    pygame.draw.line(self.screen, Colors.BLACK, (half_width - 3, (half_height - h)),
                                      (half_width + 3, half_height - h))
                     # negative y-axis
                     text_y_axis_negative = self.font.render(f'-{str(h)}', False, Colors.BLACK)
-                    surface.blit(text_y_axis_negative, (half_width - 20, (half_height + h - 5)))
-                    pygame.draw.line(surface, Colors.BLACK, (half_width - 3, (half_height + h)),
+                    self.screen.blit(text_y_axis_negative, (half_width - 20, (half_height + h - 5)))
+                    pygame.draw.line(self.screen, Colors.BLACK, (half_width - 3, (half_height + h)),
                                      (half_width + 3, half_height + h))
 
     def _draw_at_canvas(self, canvas: Canvas):
-        surface = self.surfaces[canvas.tag]
+        surface: pygame.Rect = self.surfaces[canvas.tag]
         if surface is None:
             return
         color = Colors.BLACK
-        background_color = Colors.WHITE
-        self.screen.fill(background_color)
+        # background_color = Colors.WHITE
+        # self.screen.fill(background_color)
+        # draw borders
+        if canvas.show_border:
+
+            # surface.create_line(0, canvas.height, canvas.width, canvas.height)
+            #
+            # surface.create_line(0, 2, canvas.width, 2)
+            #
+            # surface.create_line(canvas.width, 0, canvas.width, canvas.height)
+            #
+            # surface.create_line(2, canvas.height, 2, 0)
+
+            # bottom
+            pygame.draw.line(self.screen, Colors.BLACK, (canvas.start.x, canvas.start.y + canvas.height),
+                             (canvas.start.x + canvas.width, canvas.start.y + canvas.height))
+            # top
+            pygame.draw.line(self.screen, Colors.BLACK, (canvas.start.x, canvas.start.y),
+                             (canvas.start.x + canvas.width, canvas.start.y))
+            # right
+            pygame.draw.line(self.screen, Colors.BLACK, (canvas.start.x + canvas.width, canvas.start.y),
+                             (canvas.start.x + canvas.width, canvas.start.y + canvas.height))
+            # left
+            pygame.draw.line(self.screen, Colors.BLACK, (canvas.start.x, canvas.start.y + canvas.height),
+                             (canvas.start.x, canvas.start.y))
         if canvas.show_cp:
             self._build_cp(canvas)
             for shape in canvas.shapes:
                 for point in shape.points:
-                    x = canvas.width / 2 + point.x
-                    y = canvas.height - (canvas.height / 2 + point.y)
-                    pygame.draw.circle(surface, color, (x, y), 1, 1)
+                    x = (canvas.width / 2 + point.x) + canvas.start.x
+                    y = (canvas.height - (canvas.height / 2 + point.y)) + canvas.start.y
+                    pygame.draw.circle(self.screen, color, (x, y), 1, 1)
         else:
             for shape in canvas.shapes:
                 for point in shape.points:
-                    pygame.draw.circle(surface, color, (abs(point.x), abs(canvas.height - point.y)), 1, 1)
-        self.screen.blit(surface, (canvas.start.x, canvas.start.y))
+                    pygame.draw.circle(self.screen, color, (abs(point.x + canvas.start.x),
+                                                            abs((canvas.height - point.y) + canvas.start.y)), 1, 1)
 
     def draw(self):
         running = True
@@ -171,7 +201,6 @@ class PygameScreen(Screen):
                 for canvas in self.canvas_list:
                     self._draw_at_canvas(canvas)
                 pygame.display.flip()
-
             except KeyboardInterrupt:
                 pass
 
