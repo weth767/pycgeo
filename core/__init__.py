@@ -102,12 +102,12 @@ class QuadraticBezierCurve:
         points = []
         i = 0
         while True:
-            xa = self._nextPoint(self.a.x, self.b.x, i)
-            ya = self._nextPoint(self.a.y, self.b.y, i)
-            xb = self._nextPoint(self.b.x, self.c.x, i)
-            yb = self._nextPoint(self.b.y, self.c.y, i)
-            x = self._nextPoint(xa, xb, i)
-            y = self._nextPoint(ya, yb, i)
+            xa = self._next_point(self.a.x, self.b.x, i)
+            ya = self._next_point(self.a.y, self.b.y, i)
+            xb = self._next_point(self.b.x, self.c.x, i)
+            yb = self._next_point(self.b.y, self.c.y, i)
+            x = self._next_point(xa, xb, i)
+            y = self._next_point(ya, yb, i)
             points.append(Point(x=x, y=y))
             if i >= 1:
                 break
@@ -115,7 +115,7 @@ class QuadraticBezierCurve:
         return points
 
     @staticmethod
-    def _nextPoint(x, y, precision):
+    def _next_point(x, y, precision):
         diff = int(y - x)
         return x + (diff * precision)
 
@@ -127,11 +127,6 @@ class CubicBezierCurve:
         self.c = c
         self.d = d
         self.precision = 1 if (precision is None or precision <= 0) else precision
-
-    @staticmethod
-    def _nextPoint(x, y, precision):
-        diff = int(y - x)
-        return x + (diff * precision)
 
     def build(self):
         points = []
