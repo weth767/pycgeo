@@ -23,7 +23,7 @@ class ErrorCodes(Enum):
 
 
 class Messages:
-    _locale = locale.getdefaultlocale()
+
     __tip_messages__ = {
         ErrorCodes.ERROR: {
             Languages.PT_BR: 'Verique os parâmetros e saída e tente novamente.',
@@ -70,7 +70,7 @@ class Messages:
             Languages.EN_US: 'The parameter "{parameter_name}" cannot be empty.',
             Languages.ES_ES: 'El parámetro "{parameter_name}" no puede estar vacío.'
         }
-    },
+    }
     __error_messages__ = {
         ErrorCodes.ERROR: {
             Languages.PT_BR: 'Erro desconhecido',
@@ -120,18 +120,20 @@ class Messages:
     }
 
     @staticmethod
-    def get_message(error_code: ErrorCodes, language: Languages):
-        return Messages.__error_messages__[error_code][language]
+    def get_message(error_code: ErrorCodes):
+        return Messages.__error_messages__[error_code][Languages[Messages.locale().upper()]]
 
     @staticmethod
-    def get_tip_message(error_code: ErrorCodes, language: Languages, parameter_name: str):
-        return Messages.__tip_messages__[error_code][language].format(parameter_name=parameter_name)
+    def get_tip_message(error_code: ErrorCodes, parameter_name=''):
+        return Messages.__tip_messages__[error_code][Languages[Messages.locale().upper()]].format(parameter_name=parameter_name)
+
+    @staticmethod
+    def locale():
+        return locale.getdefaultlocale()[0]
 
 
 class BaseException(Exception):
-    _locale = locale.getdefaultlocale()
-
-    def __init__(self, message=Messages.get_message(ErrorCodes.ERROR, _locale), error_code=ErrorCodes.ERROR, tip=Messages.get_tip_message(ErrorCodes.ERROR, _locale, '')):
+    def __init__(self, message=Messages.get_message(ErrorCodes.ERROR), error_code=ErrorCodes.ERROR, tip=Messages.get_tip_message(ErrorCodes.ERROR, '')):
         self.message = message
         self.error_code = error_code
         self.tip = tip
