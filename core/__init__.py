@@ -1,24 +1,29 @@
 import math
+import numpy as np
+
+from errors import ArithmeticException
 
 
 class Point:
     def __init__(self, **kwargs):
         self.x = kwargs.get('x')
         self.y = kwargs.get('y')
-        self.z = kwargs.get('z')
+        self.z = None
+        # at the moment, the z coordinate is disabled
+        # self.z = kwargs.get('z')
 
     def __str__(self):
         return f"x: {self.x}, y: {self.y}" if self.z is None else f"x: {self.x}, y: {self.y}, z: {self.z}"
 
     def distance(self, point: "Point"):
         if self.z is None and point.z is None:
-            return math.sqrt((math.pow((self.x - point.x), 2) + math.pow((self.y - point.y), 2)))
+            return math.sqrt(math.pow((point.x - self.x), 2) + math.pow((point.y - self.y), 2))
         if self.z is None:
             self.z = 0
         if point.z is None:
             point.z = 0
-        return math.sqrt((math.pow((self.x - point.x), 2) + math.pow((self.y - point.y), 2)
-                          + math.pow((self.z - point.z), 2)))
+        return math.sqrt((math.pow((point.x - self.x), 2) + math.pow((point.y - self.y), 2)
+                          + math.pow((point.z - self.z), 2)))
 
     def median_point(self, point: "Point"):
         if self.z is None and point.z is None:
@@ -31,7 +36,8 @@ class Point:
 
     def __sub__(self, point: "Point"):
         if not isinstance(point, Point):
-            raise ArithmeticError("Isn't possible to sub 'Point' with another type of data")
+            raise ArithmeticException(
+                "Isn't possible to sub 'Point' with another type of data")
         if self.z is None and point.z is None:
             return Point(x=(self.x - point.x), y=(self.y - point.y))
         if self.z is None:
@@ -42,7 +48,8 @@ class Point:
 
     def __add__(self, point: "Point"):
         if not isinstance(point, Point):
-            raise ArithmeticError("Isn't possible to add 'Point' with another type of data")
+            raise ArithmeticException(
+                "Isn't possible to add 'Point' with another data type")
         if self.z is None and point.z is None:
             return Point(x=(self.x + point.x), y=(self.y + point.y))
         if self.z is None:
@@ -53,7 +60,8 @@ class Point:
 
     def __eq__(self, point: "Point"):
         if not isinstance(point, Point):
-            raise AssertionError("Isn't possible to compare 'Point' with another type of data")
+            raise AssertionError(
+                "Isn't possible to compare 'Point' with another data type")
         if self.z is None and point.z is None:
             return self.x == point.x and self.y == point.y
         if self.z is None:
@@ -64,19 +72,22 @@ class Point:
 
     def __mul__(self, value):
         if value is None:
-            raise ArithmeticError("Isn't possible to multiply a 'Point' with None value")
+            raise ArithmeticException(
+                "Isn't possible to multiply a 'Point' with None value")
         if type(value) != float and type(value) != int:
-            raise ArithmeticError("Isn't possible to multiply 'Point' with type different than int or float")
+            raise ArithmeticException(
+                "Isn't possible to multiply 'Point' with type different than int or float")
         if self.z is None:
             return Point(x=(self.x * value), y=(self.y * value))
         return Point(x=(self.x * value), y=(self.y * value), z=(self.z * value))
 
 
 class LinearBezierCurve:
-    def __init__(self, a: Point, b: Point, precision=0.001):
+    def __init__(self, a: Point, b: Point, precision=0.00001):
         self.a = a
         self.b = b
-        self.precision = 1 if (precision is None or precision <= 0) else precision
+        self.precision = 1 if (
+            precision is None or precision <= 0) else precision
 
     def build(self):
         points = []
@@ -92,11 +103,12 @@ class LinearBezierCurve:
 
 
 class QuadraticBezierCurve:
-    def __init__(self, a: Point, b: Point, c: Point, precision=0.0001):
+    def __init__(self, a: Point, b: Point, c: Point, precision=0.00001):
         self.a = a
         self.b = b
         self.c = c
-        self.precision = 1 if (precision is None or precision <= 0) else precision
+        self.precision = 1 if (
+            precision is None or precision <= 0) else precision
 
     def build(self):
         points = []
@@ -121,12 +133,13 @@ class QuadraticBezierCurve:
 
 
 class CubicBezierCurve:
-    def __init__(self, a: Point, b: Point, c: Point, d: Point, precision=0.0001):
+    def __init__(self, a: Point, b: Point, c: Point, d: Point, precision=0.00001):
         self.a = a
         self.b = b
         self.c = c
         self.d = d
-        self.precision = 1 if (precision is None or precision <= 0) else precision
+        self.precision = 1 if (
+            precision is None or precision <= 0) else precision
 
     def build(self):
         points = []
