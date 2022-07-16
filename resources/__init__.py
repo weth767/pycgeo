@@ -1,6 +1,7 @@
 import abc
 import sys
 from tkinter import font
+from typing import Dict
 import pygame
 import tkinter as tk
 from core import Point
@@ -29,6 +30,7 @@ class Canvas:
         font_size: int
         font_family: str Example 'Arial'
     """
+
     def __init__(self, width: int, height: int, start: Point, tag: str, shapes: list[Shape],
                  background_color=Colors.WHITE, color=Colors.BLACK, show_cp=False,
                  show_cpn=True, show_cpl=True, cpl_color=Colors.BLACK, cpn_color=Colors.BLACK,
@@ -53,7 +55,7 @@ class Canvas:
 
 
 class Screen(metaclass=abc.ABCMeta):
-    surfaces: {}
+    surfaces = dict()
 
     @abc.abstractmethod
     def __init__(self):
@@ -118,7 +120,8 @@ class PygameScreen(Screen):
     def configure(self, canvas_list: list[Canvas]):
         self.canvas_list = canvas_list
         for canvas in canvas_list:
-            surface = pygame.Rect((canvas.start.x, canvas.start.y, canvas.width, canvas.height))
+            surface = pygame.Rect(
+                (canvas.start.x, canvas.start.y, canvas.width, canvas.height))
             self.surfaces[canvas.tag] = surface
 
     def reset(self):
@@ -137,7 +140,8 @@ class PygameScreen(Screen):
                              (canvas.start.x + canvas.width, half_height))
             pygame.draw.line(self.screen, Colors.BLACK, (half_width, canvas.start.y),
                              (half_width, canvas.start.y + canvas.height))
-            pygame.draw.circle(self.screen, Colors.BLACK, (half_width, half_height), 2, 0)
+            pygame.draw.circle(self.screen, Colors.BLACK,
+                               (half_width, half_height), 2, 0)
 
         if canvas.show_cpn:
             # draw x-axis positive and negative marks and numbers
@@ -148,14 +152,18 @@ class PygameScreen(Screen):
             for w in range(1, width_range):
                 if w % 25 == 0:
                     # positive x-axis
-                    text_x_axis_positive = canvas_font.render(str(w), False, Colors.BLACK)
-                    self.screen.blit(text_x_axis_positive, (half_width + w - 5, (half_height - 20)))
+                    text_x_axis_positive = canvas_font.render(
+                        str(w), False, Colors.BLACK)
+                    self.screen.blit(text_x_axis_positive,
+                                     (half_width + w - 5, (half_height - 20)))
                     pygame.draw.line(self.screen, Colors.BLACK, (half_width + w, (half_height - 3)),
                                      (half_width + w, half_height + 3))
                     # negative x-axis
-                    text_x_axis_negative = canvas_font.render(f'-{str(w)}', False, Colors.BLACK)
+                    text_x_axis_negative = canvas_font.render(
+                        f'-{str(w)}', False, Colors.BLACK)
 
-                    self.screen.blit(text_x_axis_negative, (half_width - 5 - w, (half_height - 20)))
+                    self.screen.blit(text_x_axis_negative,
+                                     (half_width - 5 - w, (half_height - 20)))
                     pygame.draw.line(self.screen, Colors.BLACK, (half_width - w, (half_height - 3)),
                                      (half_width - w, half_height + 3))
 
@@ -163,13 +171,17 @@ class PygameScreen(Screen):
             for h in range(1, height_range):
                 if h % 25 == 0:
                     # positive y-axis
-                    text_y_axis_positive = canvas_font.render(str(h), False, Colors.BLACK)
-                    self.screen.blit(text_y_axis_positive, (half_width - 20, (half_height - h - 5)))
+                    text_y_axis_positive = canvas_font.render(
+                        str(h), False, Colors.BLACK)
+                    self.screen.blit(text_y_axis_positive,
+                                     (half_width - 20, (half_height - h - 5)))
                     pygame.draw.line(self.screen, Colors.BLACK, (half_width - 3, (half_height - h)),
                                      (half_width + 3, half_height - h))
                     # negative y-axis
-                    text_y_axis_negative = canvas_font.render(f'-{str(h)}', False, Colors.BLACK)
-                    self.screen.blit(text_y_axis_negative, (half_width - 20, (half_height + h - 5)))
+                    text_y_axis_negative = canvas_font.render(
+                        f'-{str(h)}', False, Colors.BLACK)
+                    self.screen.blit(text_y_axis_negative,
+                                     (half_width - 20, (half_height + h - 5)))
                     pygame.draw.line(self.screen, Colors.BLACK, (half_width - 3, (half_height + h)),
                                      (half_width + 3, half_height + h))
 
@@ -199,7 +211,8 @@ class PygameScreen(Screen):
             for shape in canvas.shapes:
                 for point in shape.points:
                     x = (canvas.width / 2 + point.x) + canvas.start.x
-                    y = (canvas.height - (canvas.height / 2 + point.y)) + canvas.start.y
+                    y = (canvas.height - (canvas.height / 2 + point.y)) + \
+                        canvas.start.y
                     pygame.draw.circle(self.screen, color, (x, y), 1, 1)
         else:
             for shape in canvas.shapes:
@@ -230,7 +243,8 @@ class TkinterScreen(Screen):
         self.screen = tk.Tk()
         width = self.screen.winfo_screenwidth()
         height = self.screen.winfo_screenheight()
-        self.screen.configure(width=width, height=height, background=Utils.rgb_tuple_to_rex(Colors.WHITE))
+        self.screen.configure(width=width, height=height,
+                              background=Utils.rgb_tuple_to_rex(Colors.WHITE))
         self.canvas_list: list[Canvas] = []
 
     def configure(self, canvas_list: list[Canvas]):
@@ -265,31 +279,39 @@ class TkinterScreen(Screen):
                 if w % 25 == 0:
                     # positive x-axis
                     surface.create_text(half_width + w, (half_height - 10),
-                                        fill=Utils.rgb_tuple_to_rex(canvas.cpn_color),
+                                        fill=Utils.rgb_tuple_to_rex(
+                                            canvas.cpn_color),
                                         font=font.Font(family=canvas.font_family,
                                                        size=canvas.font_size - 1), text=w)
-                    surface.create_line((half_width + w, (half_height - 3)), (half_width + w, half_height + 3))
+                    surface.create_line(
+                        (half_width + w, (half_height - 3)), (half_width + w, half_height + 3))
                     # negative x-axis
                     surface.create_text(half_width - w, (half_height - 10),
-                                        fill=Utils.rgb_tuple_to_rex(canvas.cpn_color),
+                                        fill=Utils.rgb_tuple_to_rex(
+                                            canvas.cpn_color),
                                         font=font.Font(family=canvas.font_family,
                                                        size=canvas.font_size - 1), text=w * -1)
-                    surface.create_line((half_width - w, (half_height - 3)), (half_width - w, half_height + 3))
+                    surface.create_line(
+                        (half_width - w, (half_height - 3)), (half_width - w, half_height + 3))
             # draw y-axis positive and negative marks and numbers
             for h in range(1, int(half_height)):
                 if h % 25 == 0:
                     # positive y-axis
                     surface.create_text(half_width - 13, (half_height - h),
-                                        fill=Utils.rgb_tuple_to_rex(canvas.cpn_color),
+                                        fill=Utils.rgb_tuple_to_rex(
+                                            canvas.cpn_color),
                                         font=font.Font(family=canvas.font_family,
                                                        size=canvas.font_size - 1), text=h)
-                    surface.create_line(half_width - 3, (half_height - h), half_width + 3, half_height - h)
+                    surface.create_line(
+                        half_width - 3, (half_height - h), half_width + 3, half_height - h)
                     # negative y-axis
                     surface.create_text(half_width - 13, (half_height + h),
-                                        fill=Utils.rgb_tuple_to_rex(canvas.cpn_color),
+                                        fill=Utils.rgb_tuple_to_rex(
+                                            canvas.cpn_color),
                                         font=font.Font(family=canvas.font_family,
                                                        size=canvas.font_size - 1), text=h * -1)
-                    surface.create_line(half_width - 3, (half_height + h), half_width + 3, half_height + h)
+                    surface.create_line(
+                        half_width - 3, (half_height + h), half_width + 3, half_height + h)
 
     def _draw_at_canvas(self, canvas: Canvas):
         surface: tk.Canvas = self.surfaces[canvas.tag]

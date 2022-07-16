@@ -1,6 +1,5 @@
 import math
 import numpy as np
-
 from errors import ArithmeticException
 
 
@@ -83,7 +82,7 @@ class Point:
 
 
 class LinearBezierCurve:
-    def __init__(self, a: Point, b: Point, precision=0.00001):
+    def __init__(self, a: Point, b: Point, precision=0.0001):
         self.a = a
         self.b = b
         self.precision = 1 if (
@@ -103,7 +102,7 @@ class LinearBezierCurve:
 
 
 class QuadraticBezierCurve:
-    def __init__(self, a: Point, b: Point, c: Point, precision=0.00001):
+    def __init__(self, a: Point, b: Point, c: Point, precision=0.0001):
         self.a = a
         self.b = b
         self.c = c
@@ -133,7 +132,7 @@ class QuadraticBezierCurve:
 
 
 class CubicBezierCurve:
-    def __init__(self, a: Point, b: Point, c: Point, d: Point, precision=0.00001):
+    def __init__(self, a: Point, b: Point, c: Point, d: Point, precision=0.0001):
         self.a = a
         self.b = b
         self.c = c

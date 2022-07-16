@@ -1,19 +1,16 @@
-from core import Point
+from enum import Enum
+import locale
 
 
 class Utils:
     def __init__(self):
         pass
 
-    @staticmethod
-    def validate_points_filled(p: Point) -> bool:
-        return not(p is None or p.x is None or p.y is None)
-
-    @staticmethod
+    @ staticmethod
     def rgb_to_hex(r: int, g: int, b: int):
         return '#{:X}{:X}{:X}'.format(r, g, b)
 
-    @staticmethod
+    @ staticmethod
     def rgb_tuple_to_rex(rgb: tuple) -> str:
         if len(rgb) != 3:
             return ''
@@ -45,3 +42,61 @@ class Colors:
     LIGHT_RED = (255, 80, 80)
     LIGHT_BLUE = (0, 200, 255)
     LIME = (0, 255, 127)
+
+
+class Languages(Enum):
+    PT_BR = 'pt_BR'
+    EN_US = 'en_US'
+    ES_ES = 'es_ES'
+
+
+class ShapeTypes(Enum):
+    LINESEGMENT = 'LINESEGMENT'
+    CIRCLE = 'CIRCLE'
+    TRIANGLE = 'TRIANGLE'
+    RECTANGLE = 'RECTANGLE'
+    SQUARE = 'SQUARE'
+    PENTAGON = 'PENTAGON'
+    HEXAGON = 'HEXAGON'
+    HEPTAGON = 'HEPTAGON'
+    OCTAGON = 'OCTAGON'
+    NONAGON = 'NONAGON'
+    DECAGON = 'DECAGON'
+    RHOMBUS = 'RHOMBUS'
+    SEMICURVE = 'SEMICURVE'
+    CURVE = 'CURVE'
+
+
+class TriangleTypes(Enum):
+    EQUILATERAL = 'EQUILATERAL'
+    ISOSCELES = 'ISOSCELES'
+    SCALENE = 'SCALENE'
+
+
+class ShapeUtils:
+    __types__ = {
+        "TRIANGLE": {
+            Languages.PT_BR.value: {
+                "EQUILATERAL": "Triângulo Equilátero",
+                "ISOSCELES": "Triângulo Isósceles",
+                "SCALENE": "Triângulo Escaleno"
+            },
+            Languages.EN_US.value: {
+                "EQUILATERAL": "Equilateral Triangle",
+                "ISOSCELES": "Isosceles Triangle",
+                "SCALENE": "Scalene Triangle"
+            },
+            Languages.ES_ES.value: {
+                "EQUILATERAL": "Triangulo Equilátero",
+                "ISOSCELES": "Triangulo Isósceles",
+                "SCALENE": "Triangulo Escaleno"
+            }
+        }
+    }
+
+    @staticmethod
+    def get_shape_type(shape: ShapeTypes, specific_type=None) -> str:
+        language = locale.getdefaultlocale()[0]
+        if specific_type is not None:
+            return ShapeUtils.__types__[shape.value][language][specific_type]
+        return ShapeUtils.__types__[shape.value][language]

@@ -1,12 +1,7 @@
 import locale
 
 from enum import Enum
-
-
-class Languages(Enum):
-    PT_BR = 'pt_BR'
-    EN_US = 'en_US'
-    ES_ES = 'es_ES'
+from utils import Languages
 
 
 class ErrorCodes(Enum):
